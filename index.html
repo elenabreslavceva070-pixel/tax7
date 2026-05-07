@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чек-лист — начало работы (шаг 2)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eef3ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+        }
+        .sheet {
+            max-width: 700px;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .sheet-header {
+            background: #F8FAFE;
+            padding: 10px 16px;
+            border-bottom: 1px solid #E2E9F2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .sheet-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2f3e;
+        }
+        .pdf-btn {
+            background: #2c5f8a;
+            color: white;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.65rem;
+            cursor: pointer;
+        }
+        .sheet-content {
+            padding: 14px;
+        }
+        .section {
+            background: #F9FBFE;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 14px;
+            border-left: 3px solid #C3D7FF;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #1f2f3e;
+            margin-bottom: 10px;
+        }
+        /* Компактный список этапов (только чтение) */
+        .stages-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stage-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F1F4F9;
+            padding: 3px 8px;
+            border-radius: 24px;
+            font-size: 0.7rem;
+        }
+        .stage-num-sm {
+            font-weight: 700;
+            background: #C3D7FF;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            flex-shrink: 0;
+        }
+        .stage-text {
+            flex: 1;
+            color: #1f2f3e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .stage-check {
+            font-size: 0.8rem;
+            min-width: 20px;
+            text-align: center;
+        }
+        /* Компактные выпадающие списки */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 32px;
+            border: 1px solid #E9EDF2;
+        }
+        .option-num {
+            font-weight: 700;
+            font-size: 0.7rem;
+            background: #C3D7FF;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            flex-shrink: 0;
+        }
+        .option-select {
+            flex: 1;
+        }
+        select {
+            width: 100%;
+            padding: 5px 8px;
+            border-radius: 24px;
+            border: 1px solid #CDD9ED;
+            background: white;
+            font-size: 0.7rem;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .option-status {
+            font-size: 0.85rem;
+            min-width: 22px;
+            text-align: center;
+        }
+        .btn {
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            cursor: pointer;
+            background: #C3D7FF;
+            color: #1f2f3e;
+            margin-top: 8px;
+        }
+        .message {
+            margin-top: 10px;
+            padding: 6px 12px;
+            border-radius: 24px;
+            font-size: 0.7rem;
+            display: none;
+        }
+        .locked-warning {
+            background: #FFFBEE;
+            padding: 10px;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #b86f2c;
+            margin-bottom: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="sheet" id="pdfContainer">
+    <div class="sheet-header">
+        <h2>📋 Чек-лист — Что не упустить в начале работы</h2>
+        <button id="downloadPdfBtn" class="pdf-btn">📎 PDF</button>
+    </div>
+    <div class="sheet-content">
+        <div id="accessWarning" class="locked-warning" style="display: none;">
+            ⚠️ Сначала завершите первый шаг
+        </div>
+
+        <div id="stagesPreviewSection" class="section">
+            <div class="section-title">📌 Этапы (из шага 1)</div>
+            <div id="stagesPreviewList" class="stages-compact"></div>
+        </div>
+
+        <div id="contractSection" class="section">
+            <div class="section-title">✍️ Обязательные условия в договоре</div>
+            <div id="contractList" class="options-list"></div>
+        </div>
+
+        <div id="conclusionSection" class="section">
+            <div class="section-title">📌 Что не упустить в заключении</div>
+            <div id="conclusionList" class="options-list"></div>
+            <button id="checkBtn" class="btn">✓ Проверить</button>
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CORRECT_STAGES = [
+        "Согласовать условия работы", "Заключить договор", "Оформить доверенность при необходимости",
+        "Запросить уставные документы", "Узнать систему налогообложения",
+        "Узнать, есть ли у клиента претензии или проверки от налоговой",
+        "Проанализировать учет и нормы", "Подготовить варианты решения",
+        "Обсудить варианты с клиентом и выбрать лучший"
+    ];
+
+    const CORRECT_CONTRACT = [
+        "Предмет договора", "Ответственность сторон", "Конфиденциальность",
+        "Стоимость и оплата", "Порядок расторжения", "Сроки оказания услуг"
+    ];
+
+    const ALL_CONTRACT_OPTIONS = [
+        "Предмет договора", "Ответственность сторон", "Конфиденциальность",
+        "Стоимость и оплата", "Порядок расторжения", "Сроки оказания услуг",
+        "Устная договоренность", "Штраф клиента", "Неограниченная ответственность"
+    ];
+
+    const CORRECT_CONCLUSION = [
+        "Описание обстоятельств", "Анализ норм и рисков", "Обоснованные выводы",
+        "Ограничение ответственности", "Оговорка о статусе заключения"
+    ];
+
+    const ALL_CONCLUSION_OPTIONS = [
+        "Описание обстоятельств", "Анализ норм и рисков", "Обоснованные выводы",
+        "Ограничение ответственности", "Оговорка о статусе заключения",
+        "Гарантия выигрыша", "Совет без анализа", "Без даты и подписи"
+    ];
+
+    function shuffleArray(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    let randomContractOptions = shuffleArray(ALL_CONTRACT_OPTIONS);
+    let randomConclusionOptions = shuffleArray(ALL_CONCLUSION_OPTIONS);
+
+    let contractSelections = new Array(CORRECT_CONTRACT.length).fill("");
+    let conclusionSelections = new Array(CORRECT_CONCLUSION.length).fill("");
+    let stageSelections = new Array(9).fill("");
+    let isFirstStepCompleted = false;
+
+    const stagesPreview = document.getElementById('stagesPreviewList');
+    const contractContainer = document.getElementById('contractList');
+    const conclusionContainer = document.getElementById('conclusionList');
+    const checkBtn = document.getElementById('checkBtn');
+    const messageDiv = document.getElementById('message');
+    const accessWarning = document.getElementById('accessWarning');
+    const contractSection = document.getElementById('contractSection');
+    const conclusionSection = document.getElementById('conclusionSection');
+    const downloadBtn = document.getElementById('downloadPdfBtn');
+
+    function checkAccess() {
+        const completed = localStorage.getItem('step1_completed');
+        isFirstStepCompleted = (completed === 'true');
+        
+        const savedSelections = localStorage.getItem('step1_selections');
+        if (savedSelections) {
+            try {
+                stageSelections = JSON.parse(savedSelections);
+                if (!Array.isArray(stageSelections) || stageSelections.length !== 9) stageSelections = new Array(9).fill("");
+            } catch(e) { stageSelections = new Array(9).fill(""); }
+        }
+
+        if (!isFirstStepCompleted) {
+            accessWarning.style.display = 'block';
+            contractSection.style.opacity = '0.5';
+            conclusionSection.style.opacity = '0.5';
+            contractSection.style.pointerEvents = 'none';
+            conclusionSection.style.pointerEvents = 'none';
+            downloadBtn.style.display = 'none';
+        } else {
+            accessWarning.style.display = 'none';
+            contractSection.style.opacity = '1';
+            conclusionSection.style.opacity = '1';
+            contractSection.style.pointerEvents = 'auto';
+            conclusionSection.style.pointerEvents = 'auto';
+            downloadBtn.style.display = 'block';
+            loadData();
+            renderStagesPreview();
+            renderContract();
+            renderConclusion();
+        }
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('checklist_step2');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                contractSelections = data.contractSelections || new Array(CORRECT_CONTRACT.length).fill("");
+                conclusionSelections = data.conclusionSelections || new Array(CORRECT_CONCLUSION.length).fill("");
+                if (data.randomContractOptions) randomContractOptions = data.randomContractOptions;
+                if (data.randomConclusionOptions) randomConclusionOptions = data.randomConclusionOptions;
+            } catch(e) {}
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('checklist_step2', JSON.stringify({
+            contractSelections: contractSelections,
+            conclusionSelections: conclusionSelections,
+            randomContractOptions: randomContractOptions,
+            randomConclusionOptions: randomConclusionOptions
+        }));
+    }
+
+    function renderStagesPreview() {
+        stagesPreview.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const val = stageSelections[i] || '—';
+            const isCorrect = (val === CORRECT_STAGES[i]);
+            stagesPreview.innerHTML += `
+                <div class="stage-line">
+                    <div class="stage-num-sm">${i+1}</div>
+                    <div class="stage-text" title="${val}">${val.length > 35 ? val.slice(0,32)+'…' : val}</div>
+                    <div class="stage-check">${isCorrect && stageSelections[i] ? '✅' : (stageSelections[i] ? '❌' : '○')}</div>
+                </div>
+            `;
+        }
+    }
+
+    function renderContract() {
+        contractContainer.innerHTML = '';
+        for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
+            const row = document.createElement('div');
+            row.className = 'option-row';
+            row.innerHTML = `
+                <div class="option-num">${i+1}</div>
+                <div class="option-select">
+                    <select data-contract-idx="${i}" class="contract-select">
+                        <option value="">--</option>
+                        ${randomContractOptions.map(opt => `<option value="${opt.replace(/"/g, '&quot;')}" ${contractSelections[i] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="option-status" id="contractIcon${i}"></div>
+            `;
+            contractContainer.appendChild(row);
+        }
+        document.querySelectorAll('.contract-select').forEach(sel => {
+            sel.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.dataset.contractIdx);
+                contractSelections[idx] = e.target.value;
+                saveData();
+                document.getElementById(`contractIcon${idx}`).innerHTML = '';
+                messageDiv.style.display = 'none';
+            });
+        });
+    }
+
+    function renderConclusion() {
+        conclusionContainer.innerHTML = '';
+        for (let i = 0; i < CORRECT_CONCLUSION.length; i++) {
+            const row = document.createElement('div');
+            row.className = 'option-row';
+            row.innerHTML = `
+                <div class="option-num">${i+1}</div>
+                <div class="option-select">
+                    <select data-concl-idx="${i}" class="conclusion-select">
+                        <option value="">--</option>
+                        ${randomConclusionOptions.map(opt => `<option value="${opt.replace(/"/g, '&quot;')}" ${conclusionSelections[i] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="option-status" id="conclusionIcon${i}"></div>
+            `;
+            conclusionContainer.appendChild(row);
+        }
+        document.querySelectorAll('.conclusion-select').forEach(sel => {
+            sel.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.dataset.conclIdx);
+                conclusionSelections[idx] = e.target.value;
+                saveData();
+                document.getElementById(`conclusionIcon${idx}`).innerHTML = '';
+                messageDiv.style.display = 'none';
+            });
+        });
+    }
+
+    function verifyChecklist() {
+        if (!isFirstStepCompleted) return;
+
+        const contractSet = new Set(CORRECT_CONTRACT);
+        let contractValid = true;
+        const selectedContract = contractSelections.filter(v => v !== "");
+        if (selectedContract.length !== CORRECT_CONTRACT.length) contractValid = false;
+        else for (let val of selectedContract) if (!contractSet.has(val)) { contractValid = false; break; }
+
+        for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
+            const icon = document.getElementById(`contractIcon${i}`);
+            if (icon) icon.innerHTML = contractSet.has(contractSelections[i]) ? '✅' : (contractSelections[i] ? '❌' : '');
+        }
+
+        const conclusionSet = new Set(CORRECT_CONCLUSION);
+        let conclusionValid = true;
+        const selectedConclusion = conclusionSelections.filter(v => v !== "");
+        if (selectedConclusion.length !== CORRECT_CONCLUSION.length) conclusionValid = false;
+        else for (let val of selectedConclusion) if (!conclusionSet.has(val)) { conclusionValid = false; break; }
+
+        for (let i = 0; i < CORRECT_CONCLUSION.length; i++) {
+            const icon = document.getElementById(`conclusionIcon${i}`);
+            if (icon) icon.innerHTML = conclusionSet.has(conclusionSelections[i]) ? '✅' : (conclusionSelections[i] ? '❌' : '');
+        }
+
+        if (contractValid && conclusionValid) {
+            messageDiv.style.display = 'block';
+            messageDiv.innerHTML = '🎉 Отлично! Чек-лист заполнен верно.';
+            messageDiv.style.background = '#C3D7FF';
+        } else {
+            messageDiv.style.display = 'block';
+            messageDiv.innerHTML = '⚠️ Есть ошибки. Проверьте условия договора и заключение.';
+            messageDiv.style.background = '#FFC9CC';
+        }
+    }
+
+    function downloadPDF() {
+        html2pdf().set({ margin: 0.5, filename: 'cheklist_nachalo.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(document.getElementById('pdfContainer')).save();
+    }
+
+    checkBtn.addEventListener('click', verifyChecklist);
+    downloadBtn.addEventListener('click', downloadPDF);
+    checkAccess();
+    window.addEventListener('storage', checkAccess);
+</script>
+</body>
+</html>
