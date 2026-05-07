@@ -12,25 +12,25 @@
             box-sizing: border-box;
         }
         body {
-            background: #eef3ff;
+            background: #FFFFFF;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 16px;
+            padding: 20px;
             font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
         }
         .sheet {
             max-width: 700px;
             width: 100%;
-            background: #fff;
+            background: #FFFFFF;
             border-radius: 20px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             overflow: hidden;
         }
         .sheet-header {
-            background: #F8FAFE;
-            padding: 10px 16px;
+            background: #FFFFFF;
+            padding: 12px 16px;
             border-bottom: 1px solid #E2E9F2;
             display: flex;
             justify-content: space-between;
@@ -54,34 +54,35 @@
             cursor: pointer;
         }
         .sheet-content {
-            padding: 14px;
+            padding: 16px;
+            background: #FFFFFF;
         }
         .section {
-            background: #F9FBFE;
+            background: #F2F4F8;
             border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 14px;
+            padding: 14px;
+            margin-bottom: 16px;
             border-left: 3px solid #C3D7FF;
         }
         .section-title {
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #1f2f3e;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
-        /* Компактный список этапов (только чтение) */
         .stages-compact {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
         }
         .stage-line {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #F1F4F9;
-            padding: 3px 8px;
+            background: #FFFFFF;
+            padding: 4px 10px;
             border-radius: 24px;
+            border: 1px solid #DDE3EC;
             font-size: 0.7rem;
         }
         .stage-num-sm {
@@ -108,7 +109,6 @@
             min-width: 20px;
             text-align: center;
         }
-        /* Компактные выпадающие списки */
         .options-list {
             display: flex;
             flex-direction: column;
@@ -118,10 +118,10 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: white;
-            padding: 4px 8px;
+            background: #FFFFFF;
+            padding: 5px 10px;
             border-radius: 32px;
-            border: 1px solid #E9EDF2;
+            border: 1px solid #DDE3EC;
         }
         .option-num {
             font-weight: 700;
@@ -143,7 +143,7 @@
             padding: 5px 8px;
             border-radius: 24px;
             border: 1px solid #CDD9ED;
-            background: white;
+            background: #FFFFFF;
             font-size: 0.7rem;
             font-family: inherit;
             cursor: pointer;
@@ -155,7 +155,7 @@
         }
         .btn {
             border: none;
-            padding: 6px 16px;
+            padding: 6px 18px;
             border-radius: 40px;
             font-weight: 600;
             font-size: 0.7rem;
@@ -165,7 +165,7 @@
             margin-top: 8px;
         }
         .message {
-            margin-top: 10px;
+            margin-top: 12px;
             padding: 6px 12px;
             border-radius: 24px;
             font-size: 0.7rem;
@@ -178,7 +178,7 @@
             text-align: center;
             font-size: 0.7rem;
             color: #b86f2c;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
     </style>
 </head>
@@ -194,7 +194,7 @@
         </div>
 
         <div id="stagesPreviewSection" class="section">
-            <div class="section-title">📌 Этапы (из шага 1)</div>
+            <div class="section-title">🔍 Этапы консультирования</div>
             <div id="stagesPreviewList" class="stages-compact"></div>
         </div>
 
@@ -204,7 +204,7 @@
         </div>
 
         <div id="conclusionSection" class="section">
-            <div class="section-title">📌 Что не упустить в заключении</div>
+            <div class="section-title">📌 Что не упустить в консультационном заключении</div>
             <div id="conclusionList" class="options-list"></div>
             <button id="checkBtn" class="btn">✓ Проверить</button>
             <div id="message" class="message"></div>
@@ -327,14 +327,30 @@
 
     function renderStagesPreview() {
         stagesPreview.innerHTML = '';
+        const flexibleSet = new Set([
+            "Запросить уставные документы",
+            "Узнать систему налогообложения",
+            "Узнать, есть ли у клиента претензии или проверки от налоговой"
+        ]);
+        const fixedPositions = {1: true, 2: true, 3: true, 7: true, 8: true, 9: true};
+        
         for (let i = 0; i < 9; i++) {
             const val = stageSelections[i] || '—';
-            const isCorrect = (val === CORRECT_STAGES[i]);
+            const pos = i + 1;
+            let isCorrect = false;
+            
+            if (fixedPositions[pos]) {
+                isCorrect = (val === CORRECT_STAGES[i]);
+            } else if (pos >= 4 && pos <= 6) {
+                isCorrect = (val !== "" && flexibleSet.has(val));
+            }
+            
+            const displayVal = val.length > 38 ? val.slice(0,35) + '…' : val;
             stagesPreview.innerHTML += `
                 <div class="stage-line">
                     <div class="stage-num-sm">${i+1}</div>
-                    <div class="stage-text" title="${val}">${val.length > 35 ? val.slice(0,32)+'…' : val}</div>
-                    <div class="stage-check">${isCorrect && stageSelections[i] ? '✅' : (stageSelections[i] ? '❌' : '○')}</div>
+                    <div class="stage-text" title="${val}">${displayVal}</div>
+                    <div class="stage-check">${isCorrect && val !== '—' ? '✅' : (val !== '—' ? '❌' : '○')}</div>
                 </div>
             `;
         }
@@ -433,7 +449,14 @@
     }
 
     function downloadPDF() {
-        html2pdf().set({ margin: 0.5, filename: 'cheklist_nachalo.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(document.getElementById('pdfContainer')).save();
+        const element = document.getElementById('pdfContainer');
+        html2pdf().set({
+            margin: 0.5,
+            filename: 'cheklist_nachalo_raboty.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        }).from(element).save();
     }
 
     checkBtn.addEventListener('click', verifyChecklist);
