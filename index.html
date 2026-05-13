@@ -53,7 +53,63 @@
             margin-bottom: 16px;
             border-left: 3px solid #C3D7FF;
         }
-        .section-title { font-weight: 700; font-size: 0.85rem; color: #1f2f3e; margin-bottom: 12px; }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .section-title { font-weight: 700; font-size: 0.85rem; color: #1f2f3e; }
+        .hint-icon {
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: pointer;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: #1f2f3e;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.7rem;
+            position: absolute;
+            z-index: 100;
+            top: 50%;
+            right: 100%;
+            transform: translateY(-50%);
+            margin-right: 10px;
+            white-space: normal;
+            min-width: 220px;
+            max-width: 300px;
+            word-break: break-word;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            line-height: 1.4;
+        }
+        .tooltip .tooltip-text ul {
+            margin: 4px 0 4px 16px;
+            padding-left: 0;
+        }
+        .tooltip .tooltip-text li {
+            margin: 2px 0;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
         .stages-compact {
             display: flex;
             flex-direction: column;
@@ -120,43 +176,6 @@
             font-size: 1rem;
             min-width: 28px;
             text-align: center;
-            cursor: pointer;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .tooltip {
-            position: relative;
-            display: inline-flex;
-            cursor: pointer;
-        }
-        .tooltip .tooltip-text {
-            visibility: hidden;
-            background-color: #1f2f3e;
-            color: #fff;
-            text-align: left;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 0.7rem;
-            position: absolute;
-            z-index: 100;
-            top: 50%;
-            right: 100%;
-            transform: translateY(-50%);
-            margin-right: 10px;
-            white-space: normal;
-            min-width: 200px;
-            max-width: 280px;
-            word-break: break-word;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
         }
         .btn {
             border: none;
@@ -190,17 +209,25 @@
         <div id="accessWarning" class="locked-warning" style="display: block;">⚠️ Сначала завершите первый шаг (последовательность этапов)</div>
 
         <div id="stagesPreviewSection" class="section">
-            <div class="section-title">🔍 Этапы консультирования</div>
+            <div class="section-header">
+                <div class="section-title">🔍 Этапы консультирования</div>
+            </div>
             <div id="stagesPreviewList" class="stages-compact"></div>
         </div>
 
         <div id="contractSection" class="section" style="opacity: 0.5; pointer-events: none;">
-            <div class="section-title">✍️ Выберите обязательные условия, которые вы включите в договор</div>
+            <div class="section-header">
+                <div class="section-title">✍️ Выберите обязательные условия, которые вы включите в договор</div>
+                <div class="hint-icon tooltip" id="contractHint">💡<span class="tooltip-text" id="contractHintText"></span></div>
+            </div>
             <div id="contractList" class="options-list"></div>
         </div>
 
         <div id="conclusionSection" class="section" style="opacity: 0.5; pointer-events: none;">
-            <div class="section-title">📌 Выберите пункты, которые вы включите в консультационное заключение</div>
+            <div class="section-header">
+                <div class="section-title">📌 Выберите пункты, которые вы включите в консультационное заключение</div>
+                <div class="hint-icon tooltip" id="conclusionHint">💡<span class="tooltip-text" id="conclusionHintText"></span></div>
+            </div>
             <div id="conclusionList" class="options-list"></div>
             <button id="checkBtn" class="btn">✓ Проверить</button>
         </div>
@@ -216,7 +243,6 @@
         "Обсудить варианты с клиентом и выбрать лучший"
     ];
 
-    // ПРАВИЛЬНЫЕ условия для договора (8 шт)
     const CORRECT_CONTRACT = [
         "Предмет договора",
         "Порядок сдачи-приемки услуг",
@@ -228,7 +254,6 @@
         "Форс-мажор и разрешение споров"
     ];
 
-    // ВСЕ уникальные варианты для договора (правильные + неправильные)
     const ALL_CONTRACT_OPTIONS_UNIQUE = [
         "Предмет договора",
         "Порядок сдачи-приемки услуг",
@@ -244,7 +269,6 @@
         "Предоставление консультантом справки об отсутствии судимости"
     ];
 
-    // ПРАВИЛЬНЫЕ пункты для заключения (4 шт)
     const CORRECT_CONCLUSION = [
         "Дата и номер заключения",
         "Перечень документов, предоставленных клиентом",
@@ -252,7 +276,6 @@
         "Вывод (резолютивная часть)"
     ];
 
-    // ВСЕ уникальные варианты для заключения
     const ALL_CONCLUSION_OPTIONS_UNIQUE = [
         "Дата и номер заключения",
         "Перечень документов, предоставленных клиентом",
@@ -268,12 +291,8 @@
     let conclusionSelections = new Array(CORRECT_CONCLUSION.length).fill("");
     let stageSelections = new Array(9).fill("");
     let isFirstStepCompleted = false;
-    let contractErrorCount = new Array(CORRECT_CONTRACT.length).fill(0);
-    let conclusionErrorCount = new Array(CORRECT_CONCLUSION.length).fill(0);
-
-    // Хранилище для доступных опций (уникальные)
-    let contractAvailableOptions = [...ALL_CONTRACT_OPTIONS_UNIQUE];
-    let conclusionAvailableOptions = [...ALL_CONCLUSION_OPTIONS_UNIQUE];
+    let contractHasError = false;
+    let conclusionHasError = false;
 
     const stagesPreview = document.getElementById('stagesPreviewList');
     const contractContainer = document.getElementById('contractList');
@@ -283,6 +302,8 @@
     const contractSection = document.getElementById('contractSection');
     const conclusionSection = document.getElementById('conclusionSection');
     const downloadBtn = document.getElementById('downloadPdfBtn');
+    const contractHint = document.getElementById('contractHint');
+    const conclusionHint = document.getElementById('conclusionHint');
 
     function shuffleArray(arr) {
         const copy = [...arr];
@@ -294,14 +315,12 @@
     }
 
     function getAvailableOptionsForContract(selectedValues, currentIdx) {
-        // Собираем все выбранные значения (кроме текущего)
         const usedValues = new Set();
         for (let i = 0; i < contractSelections.length; i++) {
             if (i !== currentIdx && contractSelections[i] !== "") {
                 usedValues.add(contractSelections[i]);
             }
         }
-        // Возвращаем все опции, которые ещё не использованы
         return ALL_CONTRACT_OPTIONS_UNIQUE.filter(opt => !usedValues.has(opt));
     }
 
@@ -344,6 +363,7 @@
             renderStagesPreview();
             renderContract();
             renderConclusion();
+            updateHints();
         }
     }
 
@@ -354,16 +374,30 @@
                 const data = JSON.parse(saved);
                 contractSelections = data.contractSelections || new Array(CORRECT_CONTRACT.length).fill("");
                 conclusionSelections = data.conclusionSelections || new Array(CORRECT_CONCLUSION.length).fill("");
-                if (data.contractErrorCount) contractErrorCount = data.contractErrorCount;
-                if (data.conclusionErrorCount) conclusionErrorCount = data.conclusionErrorCount;
+                contractHasError = data.contractHasError || false;
+                conclusionHasError = data.conclusionHasError || false;
             } catch(e) {}
         }
+        updateHintVisibility();
     }
 
     function saveData() {
         localStorage.setItem('checklist_step2', JSON.stringify({
-            contractSelections, conclusionSelections, contractErrorCount, conclusionErrorCount
+            contractSelections, conclusionSelections, contractHasError, conclusionHasError
         }));
+    }
+
+    function updateHints() {
+        const contractListHtml = `<ul>${CORRECT_CONTRACT.map(item => `<li>${item}</li>`).join('')}</ul>`;
+        contractHint.querySelector('.tooltip-text').innerHTML = `✅ Правильные условия для договора:<br>${contractListHtml}`;
+        
+        const conclusionListHtml = `<ul>${CORRECT_CONCLUSION.map(item => `<li>${item}</li>`).join('')}</ul>`;
+        conclusionHint.querySelector('.tooltip-text').innerHTML = `✅ Правильные пункты для заключения:<br>${conclusionListHtml}`;
+    }
+
+    function updateHintVisibility() {
+        contractHint.style.opacity = contractHasError ? '1' : '0';
+        conclusionHint.style.opacity = conclusionHasError ? '1' : '0';
     }
 
     function renderStagesPreview() {
@@ -434,7 +468,6 @@
             contractContainer.appendChild(row);
         }
         
-        // Заполняем выпадающие списки
         for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
             const select = document.querySelector(`.contract-select[data-contract-idx="${i}"]`);
             if (select) {
@@ -453,9 +486,7 @@
                     const idx = parseInt(e.target.dataset.contractIdx);
                     const newVal = e.target.value;
                     contractSelections[idx] = newVal;
-                    contractErrorCount[idx] = 0;
                     document.getElementById(`contractIcon${idx}`).innerHTML = '';
-                    // Обновляем все списки, чтобы убрать использованные варианты
                     updateContractSelectOptions();
                     saveData();
                 });
@@ -494,7 +525,6 @@
                     const idx = parseInt(e.target.dataset.conclIdx);
                     const newVal = e.target.value;
                     conclusionSelections[idx] = newVal;
-                    conclusionErrorCount[idx] = 0;
                     document.getElementById(`conclusionIcon${idx}`).innerHTML = '';
                     updateConclusionSelectOptions();
                     saveData();
@@ -507,6 +537,7 @@
         if (!isFirstStepCompleted) return;
 
         const contractSet = new Set(CORRECT_CONTRACT);
+        let contractAllCorrect = true;
         for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
             const val = contractSelections[i];
             const isCorrect = contractSet.has(val);
@@ -514,25 +545,18 @@
             if (icon) {
                 if (isCorrect && val !== "") {
                     icon.innerHTML = '✅';
-                    contractErrorCount[i] = 0;
                 } else if (val !== "") {
-                    contractErrorCount[i]++;
-                    if (contractErrorCount[i] === 1) {
-                        icon.innerHTML = '❌';
-                    } else {
-                        const correctAnswer = CORRECT_CONTRACT[i];
-                        const wrapper = document.createElement('span');
-                        wrapper.className = 'tooltip';
-                        wrapper.innerHTML = `💡<span class="tooltip-text">Правильно: ${correctAnswer}</span>`;
-                        wrapper.id = `contractIcon${i}`;
-                        wrapper.className = 'option-status tooltip';
-                        icon.parentNode.replaceChild(wrapper, icon);
-                    }
+                    icon.innerHTML = '❌';
+                    contractAllCorrect = false;
+                } else {
+                    icon.innerHTML = '';
+                    contractAllCorrect = false;
                 }
             }
         }
 
         const conclusionSet = new Set(CORRECT_CONCLUSION);
+        let conclusionAllCorrect = true;
         for (let i = 0; i < CORRECT_CONCLUSION.length; i++) {
             const val = conclusionSelections[i];
             const isCorrect = conclusionSet.has(val);
@@ -540,24 +564,30 @@
             if (icon) {
                 if (isCorrect && val !== "") {
                     icon.innerHTML = '✅';
-                    conclusionErrorCount[i] = 0;
                 } else if (val !== "") {
-                    conclusionErrorCount[i]++;
-                    if (conclusionErrorCount[i] === 1) {
-                        icon.innerHTML = '❌';
-                    } else {
-                        const correctAnswer = CORRECT_CONCLUSION[i];
-                        const wrapper = document.createElement('span');
-                        wrapper.className = 'tooltip';
-                        wrapper.innerHTML = `💡<span class="tooltip-text">Правильно: ${correctAnswer}</span>`;
-                        wrapper.id = `conclusionIcon${i}`;
-                        wrapper.className = 'option-status tooltip';
-                        icon.parentNode.replaceChild(wrapper, icon);
-                    }
+                    icon.innerHTML = '❌';
+                    conclusionAllCorrect = false;
+                } else {
+                    icon.innerHTML = '';
+                    conclusionAllCorrect = false;
                 }
             }
         }
 
+        // Обновляем состояние ошибок для лампочек
+        if (!contractAllCorrect) {
+            contractHasError = true;
+        } else {
+            contractHasError = false;
+        }
+        
+        if (!conclusionAllCorrect) {
+            conclusionHasError = true;
+        } else {
+            conclusionHasError = false;
+        }
+
+        updateHintVisibility();
         saveData();
     }
 
