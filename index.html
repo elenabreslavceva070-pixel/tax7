@@ -6,11 +6,7 @@
     <title>Чек-лист — начало работы (шаг 2)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #FFFFFF;
             display: flex;
@@ -38,11 +34,7 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .sheet-header h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2f3e;
-        }
+        .sheet-header h2 { font-size: 1.1rem; font-weight: 600; color: #1f2f3e; }
         .pdf-btn {
             background: #2c5f8a;
             color: white;
@@ -53,10 +45,7 @@
             font-size: 0.65rem;
             cursor: pointer;
         }
-        .sheet-content {
-            padding: 16px;
-            background: #FFFFFF;
-        }
+        .sheet-content { padding: 16px; background: #FFFFFF; }
         .section {
             background: #F2F4F8;
             border-radius: 16px;
@@ -64,12 +53,7 @@
             margin-bottom: 16px;
             border-left: 3px solid #C3D7FF;
         }
-        .section-title {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #1f2f3e;
-            margin-bottom: 12px;
-        }
+        .section-title { font-weight: 700; font-size: 0.85rem; color: #1f2f3e; margin-bottom: 12px; }
         .stages-compact {
             display: flex;
             flex-direction: column;
@@ -97,23 +81,9 @@
             font-size: 0.65rem;
             flex-shrink: 0;
         }
-        .stage-text {
-            flex: 1;
-            color: #1f2f3e;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .stage-check {
-            font-size: 0.8rem;
-            min-width: 20px;
-            text-align: center;
-        }
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+        .stage-text { flex: 1; color: #1f2f3e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stage-check { font-size: 0.8rem; min-width: 20px; text-align: center; }
+        .options-list { display: flex; flex-direction: column; gap: 6px; }
         .option-row {
             display: flex;
             align-items: center;
@@ -135,9 +105,7 @@
             border-radius: 30px;
             flex-shrink: 0;
         }
-        .option-select {
-            flex: 1;
-        }
+        .option-select { flex: 1; }
         select {
             width: 100%;
             padding: 5px 8px;
@@ -149,9 +117,46 @@
             cursor: pointer;
         }
         .option-status {
-            font-size: 0.85rem;
-            min-width: 22px;
+            font-size: 1rem;
+            min-width: 28px;
             text-align: center;
+            cursor: pointer;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: pointer;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: #1f2f3e;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            position: absolute;
+            z-index: 100;
+            top: 50%;
+            right: 100%;
+            transform: translateY(-50%);
+            margin-right: 10px;
+            white-space: normal;
+            min-width: 200px;
+            max-width: 280px;
+            word-break: break-word;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
         .btn {
             border: none;
@@ -163,13 +168,6 @@
             background: #C3D7FF;
             color: #1f2f3e;
             margin-top: 8px;
-        }
-        .message {
-            margin-top: 12px;
-            padding: 6px 12px;
-            border-radius: 24px;
-            font-size: 0.7rem;
-            display: none;
         }
         .locked-warning {
             background: #FFFBEE;
@@ -186,28 +184,25 @@
 <div class="sheet" id="pdfContainer">
     <div class="sheet-header">
         <h2>📋 Чек-лист — Что не упустить в начале работы</h2>
-        <button id="downloadPdfBtn" class="pdf-btn">📎 PDF</button>
+        <button id="downloadPdfBtn" class="pdf-btn" style="display: none;">📎 PDF</button>
     </div>
     <div class="sheet-content">
-        <div id="accessWarning" class="locked-warning" style="display: none;">
-            ⚠️ Сначала завершите первый шаг
-        </div>
+        <div id="accessWarning" class="locked-warning" style="display: block;">⚠️ Сначала завершите первый шаг (последовательность этапов)</div>
 
         <div id="stagesPreviewSection" class="section">
             <div class="section-title">🔍 Этапы консультирования</div>
             <div id="stagesPreviewList" class="stages-compact"></div>
         </div>
 
-        <div id="contractSection" class="section">
-            <div class="section-title">✍️ Обязательные условия в договоре</div>
+        <div id="contractSection" class="section" style="opacity: 0.5; pointer-events: none;">
+            <div class="section-title">✍️ Выберите обязательные условия, которые вы включите в договор</div>
             <div id="contractList" class="options-list"></div>
         </div>
 
-        <div id="conclusionSection" class="section">
-            <div class="section-title">📌 Что не упустить в консультационном заключении</div>
+        <div id="conclusionSection" class="section" style="opacity: 0.5; pointer-events: none;">
+            <div class="section-title">📌 Выберите пункты, которые вы включите в консультационное заключение</div>
             <div id="conclusionList" class="options-list"></div>
             <button id="checkBtn" class="btn">✓ Проверить</button>
-            <div id="message" class="message"></div>
         </div>
     </div>
 </div>
@@ -221,27 +216,73 @@
         "Обсудить варианты с клиентом и выбрать лучший"
     ];
 
+    // ПРАВИЛЬНЫЕ условия для договора (8 шт)
     const CORRECT_CONTRACT = [
-        "Предмет договора", "Ответственность сторон", "Конфиденциальность",
-        "Стоимость и оплата", "Порядок расторжения", "Сроки оказания услуг"
+        "Предмет договора",
+        "Порядок сдачи-приемки услуг",
+        "Права и обязанности сторон",
+        "Цена и порядок расчетов",
+        "Имущественная ответственность консультанта (оговорка о гарантиях)",
+        "Сроки оказания услуг",
+        "Конфиденциальность",
+        "Форс-мажор и разрешение споров"
     ];
 
-    const ALL_CONTRACT_OPTIONS = [
-        "Предмет договора", "Ответственность сторон", "Конфиденциальность",
-        "Стоимость и оплата", "Порядок расторжения", "Сроки оказания услуг",
-        "Устная договоренность", "Штраф клиента", "Неограниченная ответственность"
+    // ВСЕ уникальные варианты для договора (правильные + неправильные)
+    const ALL_CONTRACT_OPTIONS_UNIQUE = [
+        "Предмет договора",
+        "Порядок сдачи-приемки услуг",
+        "Права и обязанности сторон",
+        "Цена и порядок расчетов",
+        "Имущественная ответственность консультанта (оговорка о гарантиях)",
+        "Сроки оказания услуг",
+        "Конфиденциальность",
+        "Форс-мажор и разрешение споров",
+        "Нотариальное заверение каждой страницы договора",
+        "Оплата срочных услуг",
+        "Ответственность клиента",
+        "Предоставление консультантом справки об отсутствии судимости"
     ];
 
+    // ПРАВИЛЬНЫЕ пункты для заключения (4 шт)
     const CORRECT_CONCLUSION = [
-        "Описание обстоятельств", "Анализ норм и рисков", "Обоснованные выводы",
-        "Ограничение ответственности", "Оговорка о статусе заключения"
+        "Дата и номер заключения",
+        "Перечень документов, предоставленных клиентом",
+        "Дисклеймер (ограничение ответственности)",
+        "Вывод (резолютивная часть)"
     ];
 
-    const ALL_CONCLUSION_OPTIONS = [
-        "Описание обстоятельств", "Анализ норм и рисков", "Обоснованные выводы",
-        "Ограничение ответственности", "Оговорка о статусе заключения",
-        "Гарантия выигрыша", "Совет без анализа", "Без даты и подписи"
+    // ВСЕ уникальные варианты для заключения
+    const ALL_CONCLUSION_OPTIONS_UNIQUE = [
+        "Дата и номер заключения",
+        "Перечень документов, предоставленных клиентом",
+        "Дисклеймер (ограничение ответственности)",
+        "Вывод (резолютивная часть)",
+        "Подпись клиента в подтверждение ознакомления",
+        "Позиция налогового органа по вопросу клиента",
+        "Список внутренних переписок сотрудников компании",
+        "Расчет штрафных санкций за нарушение сроков ответа консультанта"
     ];
+
+    let contractSelections = new Array(CORRECT_CONTRACT.length).fill("");
+    let conclusionSelections = new Array(CORRECT_CONCLUSION.length).fill("");
+    let stageSelections = new Array(9).fill("");
+    let isFirstStepCompleted = false;
+    let contractErrorCount = new Array(CORRECT_CONTRACT.length).fill(0);
+    let conclusionErrorCount = new Array(CORRECT_CONCLUSION.length).fill(0);
+
+    // Хранилище для доступных опций (уникальные)
+    let contractAvailableOptions = [...ALL_CONTRACT_OPTIONS_UNIQUE];
+    let conclusionAvailableOptions = [...ALL_CONCLUSION_OPTIONS_UNIQUE];
+
+    const stagesPreview = document.getElementById('stagesPreviewList');
+    const contractContainer = document.getElementById('contractList');
+    const conclusionContainer = document.getElementById('conclusionList');
+    const checkBtn = document.getElementById('checkBtn');
+    const accessWarning = document.getElementById('accessWarning');
+    const contractSection = document.getElementById('contractSection');
+    const conclusionSection = document.getElementById('conclusionSection');
+    const downloadBtn = document.getElementById('downloadPdfBtn');
 
     function shuffleArray(arr) {
         const copy = [...arr];
@@ -252,28 +293,31 @@
         return copy;
     }
 
-    let randomContractOptions = shuffleArray(ALL_CONTRACT_OPTIONS);
-    let randomConclusionOptions = shuffleArray(ALL_CONCLUSION_OPTIONS);
+    function getAvailableOptionsForContract(selectedValues, currentIdx) {
+        // Собираем все выбранные значения (кроме текущего)
+        const usedValues = new Set();
+        for (let i = 0; i < contractSelections.length; i++) {
+            if (i !== currentIdx && contractSelections[i] !== "") {
+                usedValues.add(contractSelections[i]);
+            }
+        }
+        // Возвращаем все опции, которые ещё не использованы
+        return ALL_CONTRACT_OPTIONS_UNIQUE.filter(opt => !usedValues.has(opt));
+    }
 
-    let contractSelections = new Array(CORRECT_CONTRACT.length).fill("");
-    let conclusionSelections = new Array(CORRECT_CONCLUSION.length).fill("");
-    let stageSelections = new Array(9).fill("");
-    let isFirstStepCompleted = false;
-
-    const stagesPreview = document.getElementById('stagesPreviewList');
-    const contractContainer = document.getElementById('contractList');
-    const conclusionContainer = document.getElementById('conclusionList');
-    const checkBtn = document.getElementById('checkBtn');
-    const messageDiv = document.getElementById('message');
-    const accessWarning = document.getElementById('accessWarning');
-    const contractSection = document.getElementById('contractSection');
-    const conclusionSection = document.getElementById('conclusionSection');
-    const downloadBtn = document.getElementById('downloadPdfBtn');
+    function getAvailableOptionsForConclusion(selectedValues, currentIdx) {
+        const usedValues = new Set();
+        for (let i = 0; i < conclusionSelections.length; i++) {
+            if (i !== currentIdx && conclusionSelections[i] !== "") {
+                usedValues.add(conclusionSelections[i]);
+            }
+        }
+        return ALL_CONCLUSION_OPTIONS_UNIQUE.filter(opt => !usedValues.has(opt));
+    }
 
     function checkAccess() {
         const completed = localStorage.getItem('step1_completed');
         isFirstStepCompleted = (completed === 'true');
-        
         const savedSelections = localStorage.getItem('step1_selections');
         if (savedSelections) {
             try {
@@ -281,7 +325,7 @@
                 if (!Array.isArray(stageSelections) || stageSelections.length !== 9) stageSelections = new Array(9).fill("");
             } catch(e) { stageSelections = new Array(9).fill(""); }
         }
-
+        
         if (!isFirstStepCompleted) {
             accessWarning.style.display = 'block';
             contractSection.style.opacity = '0.5';
@@ -310,49 +354,70 @@
                 const data = JSON.parse(saved);
                 contractSelections = data.contractSelections || new Array(CORRECT_CONTRACT.length).fill("");
                 conclusionSelections = data.conclusionSelections || new Array(CORRECT_CONCLUSION.length).fill("");
-                if (data.randomContractOptions) randomContractOptions = data.randomContractOptions;
-                if (data.randomConclusionOptions) randomConclusionOptions = data.randomConclusionOptions;
+                if (data.contractErrorCount) contractErrorCount = data.contractErrorCount;
+                if (data.conclusionErrorCount) conclusionErrorCount = data.conclusionErrorCount;
             } catch(e) {}
         }
     }
 
     function saveData() {
         localStorage.setItem('checklist_step2', JSON.stringify({
-            contractSelections: contractSelections,
-            conclusionSelections: conclusionSelections,
-            randomContractOptions: randomContractOptions,
-            randomConclusionOptions: randomConclusionOptions
+            contractSelections, conclusionSelections, contractErrorCount, conclusionErrorCount
         }));
     }
 
     function renderStagesPreview() {
         stagesPreview.innerHTML = '';
-        const flexibleSet = new Set([
-            "Запросить уставные документы",
-            "Узнать систему налогообложения",
-            "Узнать, есть ли у клиента претензии или проверки от налоговой"
-        ]);
+        const flexibleSet = new Set(["Запросить уставные документы", "Узнать систему налогообложения", "Узнать, есть ли у клиента претензии или проверки от налоговой"]);
         const fixedPositions = {1: true, 2: true, 3: true, 7: true, 8: true, 9: true};
-        
         for (let i = 0; i < 9; i++) {
             const val = stageSelections[i] || '—';
-            const pos = i + 1;
+            const pos = i+1;
             let isCorrect = false;
-            
-            if (fixedPositions[pos]) {
-                isCorrect = (val === CORRECT_STAGES[i]);
-            } else if (pos >= 4 && pos <= 6) {
-                isCorrect = (val !== "" && flexibleSet.has(val));
-            }
-            
+            if (fixedPositions[pos]) isCorrect = (val === CORRECT_STAGES[i]);
+            else if (pos >= 4 && pos <= 6) isCorrect = (val !== "" && flexibleSet.has(val));
             const displayVal = val.length > 38 ? val.slice(0,35) + '…' : val;
-            stagesPreview.innerHTML += `
-                <div class="stage-line">
-                    <div class="stage-num-sm">${i+1}</div>
-                    <div class="stage-text" title="${val}">${displayVal}</div>
-                    <div class="stage-check">${isCorrect && val !== '—' ? '✅' : (val !== '—' ? '❌' : '○')}</div>
-                </div>
-            `;
+            stagesPreview.innerHTML += `<div class="stage-line"><div class="stage-num-sm">${pos}</div><div class="stage-text" title="${val}">${displayVal}</div><div class="stage-check">${isCorrect && val !== '—' ? '✅' : (val !== '—' ? '❌' : '○')}</div></div>`;
+        }
+    }
+
+    function updateContractSelectOptions() {
+        for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
+            const select = document.querySelector(`.contract-select[data-contract-idx="${i}"]`);
+            if (select) {
+                const currentVal = contractSelections[i];
+                const availableOpts = getAvailableOptionsForContract(contractSelections, i);
+                const shuffledOpts = shuffleArray([...availableOpts]);
+                
+                select.innerHTML = '<option value="">--</option>';
+                shuffledOpts.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (currentVal === opt) option.selected = true;
+                    select.appendChild(option);
+                });
+            }
+        }
+    }
+
+    function updateConclusionSelectOptions() {
+        for (let i = 0; i < CORRECT_CONCLUSION.length; i++) {
+            const select = document.querySelector(`.conclusion-select[data-concl-idx="${i}"]`);
+            if (select) {
+                const currentVal = conclusionSelections[i];
+                const availableOpts = getAvailableOptionsForConclusion(conclusionSelections, i);
+                const shuffledOpts = shuffleArray([...availableOpts]);
+                
+                select.innerHTML = '<option value="">--</option>';
+                shuffledOpts.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (currentVal === opt) option.selected = true;
+                    select.appendChild(option);
+                });
+            }
         }
     }
 
@@ -363,25 +428,39 @@
             row.className = 'option-row';
             row.innerHTML = `
                 <div class="option-num">${i+1}</div>
-                <div class="option-select">
-                    <select data-contract-idx="${i}" class="contract-select">
-                        <option value="">--</option>
-                        ${randomContractOptions.map(opt => `<option value="${opt.replace(/"/g, '&quot;')}" ${contractSelections[i] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                    </select>
-                </div>
+                <div class="option-select"><select data-contract-idx="${i}" class="contract-select"></select></div>
                 <div class="option-status" id="contractIcon${i}"></div>
             `;
             contractContainer.appendChild(row);
         }
-        document.querySelectorAll('.contract-select').forEach(sel => {
-            sel.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.contractIdx);
-                contractSelections[idx] = e.target.value;
-                saveData();
-                document.getElementById(`contractIcon${idx}`).innerHTML = '';
-                messageDiv.style.display = 'none';
-            });
-        });
+        
+        // Заполняем выпадающие списки
+        for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
+            const select = document.querySelector(`.contract-select[data-contract-idx="${i}"]`);
+            if (select) {
+                const availableOpts = getAvailableOptionsForContract(contractSelections, i);
+                const shuffledOpts = shuffleArray([...availableOpts]);
+                select.innerHTML = '<option value="">--</option>';
+                shuffledOpts.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (contractSelections[i] === opt) option.selected = true;
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.contractIdx);
+                    const newVal = e.target.value;
+                    contractSelections[idx] = newVal;
+                    contractErrorCount[idx] = 0;
+                    document.getElementById(`contractIcon${idx}`).innerHTML = '';
+                    // Обновляем все списки, чтобы убрать использованные варианты
+                    updateContractSelectOptions();
+                    saveData();
+                });
+            }
+        }
     }
 
     function renderConclusion() {
@@ -391,72 +470,99 @@
             row.className = 'option-row';
             row.innerHTML = `
                 <div class="option-num">${i+1}</div>
-                <div class="option-select">
-                    <select data-concl-idx="${i}" class="conclusion-select">
-                        <option value="">--</option>
-                        ${randomConclusionOptions.map(opt => `<option value="${opt.replace(/"/g, '&quot;')}" ${conclusionSelections[i] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                    </select>
-                </div>
+                <div class="option-select"><select data-concl-idx="${i}" class="conclusion-select"></select></div>
                 <div class="option-status" id="conclusionIcon${i}"></div>
             `;
             conclusionContainer.appendChild(row);
         }
-        document.querySelectorAll('.conclusion-select').forEach(sel => {
-            sel.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.conclIdx);
-                conclusionSelections[idx] = e.target.value;
-                saveData();
-                document.getElementById(`conclusionIcon${idx}`).innerHTML = '';
-                messageDiv.style.display = 'none';
-            });
-        });
+        
+        for (let i = 0; i < CORRECT_CONCLUSION.length; i++) {
+            const select = document.querySelector(`.conclusion-select[data-concl-idx="${i}"]`);
+            if (select) {
+                const availableOpts = getAvailableOptionsForConclusion(conclusionSelections, i);
+                const shuffledOpts = shuffleArray([...availableOpts]);
+                select.innerHTML = '<option value="">--</option>';
+                shuffledOpts.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (conclusionSelections[i] === opt) option.selected = true;
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.conclIdx);
+                    const newVal = e.target.value;
+                    conclusionSelections[idx] = newVal;
+                    conclusionErrorCount[idx] = 0;
+                    document.getElementById(`conclusionIcon${idx}`).innerHTML = '';
+                    updateConclusionSelectOptions();
+                    saveData();
+                });
+            }
+        }
     }
 
     function verifyChecklist() {
         if (!isFirstStepCompleted) return;
 
         const contractSet = new Set(CORRECT_CONTRACT);
-        let contractValid = true;
-        const selectedContract = contractSelections.filter(v => v !== "");
-        if (selectedContract.length !== CORRECT_CONTRACT.length) contractValid = false;
-        else for (let val of selectedContract) if (!contractSet.has(val)) { contractValid = false; break; }
-
         for (let i = 0; i < CORRECT_CONTRACT.length; i++) {
+            const val = contractSelections[i];
+            const isCorrect = contractSet.has(val);
             const icon = document.getElementById(`contractIcon${i}`);
-            if (icon) icon.innerHTML = contractSet.has(contractSelections[i]) ? '✅' : (contractSelections[i] ? '❌' : '');
+            if (icon) {
+                if (isCorrect && val !== "") {
+                    icon.innerHTML = '✅';
+                    contractErrorCount[i] = 0;
+                } else if (val !== "") {
+                    contractErrorCount[i]++;
+                    if (contractErrorCount[i] === 1) {
+                        icon.innerHTML = '❌';
+                    } else {
+                        const correctAnswer = CORRECT_CONTRACT[i];
+                        const wrapper = document.createElement('span');
+                        wrapper.className = 'tooltip';
+                        wrapper.innerHTML = `💡<span class="tooltip-text">Правильно: ${correctAnswer}</span>`;
+                        wrapper.id = `contractIcon${i}`;
+                        wrapper.className = 'option-status tooltip';
+                        icon.parentNode.replaceChild(wrapper, icon);
+                    }
+                }
+            }
         }
 
         const conclusionSet = new Set(CORRECT_CONCLUSION);
-        let conclusionValid = true;
-        const selectedConclusion = conclusionSelections.filter(v => v !== "");
-        if (selectedConclusion.length !== CORRECT_CONCLUSION.length) conclusionValid = false;
-        else for (let val of selectedConclusion) if (!conclusionSet.has(val)) { conclusionValid = false; break; }
-
         for (let i = 0; i < CORRECT_CONCLUSION.length; i++) {
+            const val = conclusionSelections[i];
+            const isCorrect = conclusionSet.has(val);
             const icon = document.getElementById(`conclusionIcon${i}`);
-            if (icon) icon.innerHTML = conclusionSet.has(conclusionSelections[i]) ? '✅' : (conclusionSelections[i] ? '❌' : '');
+            if (icon) {
+                if (isCorrect && val !== "") {
+                    icon.innerHTML = '✅';
+                    conclusionErrorCount[i] = 0;
+                } else if (val !== "") {
+                    conclusionErrorCount[i]++;
+                    if (conclusionErrorCount[i] === 1) {
+                        icon.innerHTML = '❌';
+                    } else {
+                        const correctAnswer = CORRECT_CONCLUSION[i];
+                        const wrapper = document.createElement('span');
+                        wrapper.className = 'tooltip';
+                        wrapper.innerHTML = `💡<span class="tooltip-text">Правильно: ${correctAnswer}</span>`;
+                        wrapper.id = `conclusionIcon${i}`;
+                        wrapper.className = 'option-status tooltip';
+                        icon.parentNode.replaceChild(wrapper, icon);
+                    }
+                }
+            }
         }
 
-        if (contractValid && conclusionValid) {
-            messageDiv.style.display = 'block';
-            messageDiv.innerHTML = '🎉 Отлично! Чек-лист заполнен верно.';
-            messageDiv.style.background = '#C3D7FF';
-        } else {
-            messageDiv.style.display = 'block';
-            messageDiv.innerHTML = '⚠️ Есть ошибки. Проверьте условия договора и заключение.';
-            messageDiv.style.background = '#FFC9CC';
-        }
+        saveData();
     }
 
     function downloadPDF() {
-        const element = document.getElementById('pdfContainer');
-        html2pdf().set({
-            margin: 0.5,
-            filename: 'cheklist_nachalo_raboty.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        }).from(element).save();
+        html2pdf().set({ margin: 0.5, filename: 'cheklist_nachalo_raboty.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(document.getElementById('pdfContainer')).save();
     }
 
     checkBtn.addEventListener('click', verifyChecklist);
